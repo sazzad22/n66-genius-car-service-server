@@ -10,6 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+//connecting with mongodb
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster-j.ca2ci.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -24,15 +25,16 @@ async function run() {
     const serviceCollection = client
       .db("GeniusCarService")
       .collection("services");
-    //data load ,find document, update or any other crud operation api e vetor rakhte hobe
+    //data load ,find document, update or any other crud operation api er vetor rakhte hobe
 
+    //we use this api to load all the services in the client side
     app.get("/services", async (req, res) => {
       const query = {};
       const cursor = serviceCollection.find(query); //multiple hole find ,one data hole find one
       const services = await cursor.toArray();
       res.send(services);
     });
-    //api for loading single service by the id route
+    // (read)api for loading single service by the id route
     app.get("/services/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -40,7 +42,7 @@ async function run() {
       res.send(service);
     });
 
-    //post
+    //post - (create) saveing new service to the db
     app.post("/services", async (req, res) => {
       const newService = req.body;
       const result = await serviceCollection.insertOne(newService);
