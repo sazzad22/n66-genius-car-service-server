@@ -25,7 +25,7 @@ async function run() {
     const serviceCollection = client
       .db("GeniusCarService")
       .collection("services");
-    const orderCollection = client.db("");
+    const orderCollection = client.db("GeniusCarService").collection("order");
     //data load ,find document, update or any other crud operation api er vetor rakhte hobe
 
     //we use this api to load all the services in the client side
@@ -54,6 +54,21 @@ async function run() {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await serviceCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    //Order collection api
+    //read from the db
+    app.get("/order", async (req, res) => {
+      const query = {};
+      const cursor = orderCollection.find(query);
+      const orders = await cursor.toArray();
+      res.send(orders);
+    });
+    //Create
+    app.post("/order", async (req, res) => {
+      const order = req.body;
+      const result = await orderCollection.insertOne(order);
       res.send(result);
     });
   } finally {
