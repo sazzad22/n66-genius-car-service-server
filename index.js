@@ -25,6 +25,7 @@ async function run() {
     const serviceCollection = client
       .db("GeniusCarService")
       .collection("services");
+    const orderCollection = client.db("");
     //data load ,find document, update or any other crud operation api er vetor rakhte hobe
 
     //we use this api to load all the services in the client side
@@ -42,7 +43,7 @@ async function run() {
       res.send(service);
     });
 
-    //post - (create) saveing new service to the db
+    //post - (create) saving new service to the db
     app.post("/services", async (req, res) => {
       const newService = req.body;
       const result = await serviceCollection.insertOne(newService);
