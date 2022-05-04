@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const port = process.env.PORT || 5000;
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
@@ -9,6 +10,12 @@ const app = express();
 //middleware
 app.use(cors());
 app.use(express.json());
+
+//jwt middleware fucn
+function verifyJWT(req, res, next) {
+  const authHeader = req.header.authorization;
+  console.log("from verifyJWT", authHeader);
+}
 
 //connecting with mongodb
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster-j.ca2ci.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
@@ -29,6 +36,18 @@ async function run() {
     //data load ,find document, update or any other crud operation api er vetor rakhte hobe
 
     //we use this api to load all the services in the client side
+
+    //AUTH
+    //JWT
+    app.post("/login", async (req, res) => {
+      //ei user er vetor usually user er email thake.password ekhane rakha hoy na cz sheta secure na.
+      const user = req.body;
+      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1d",
+      });
+      res.send({ accessToken });
+    });
+
     app.get("/services", async (req, res) => {
       const query = {};
       const cursor = serviceCollection.find(query); //multiple hole find ,one data hole find one
@@ -59,8 +78,10 @@ async function run() {
 
     //Order collection api
     //read from the db
-    app.get("/order", async (req, res) => {
-      const query = {};
+    //getting the orders of a specific user the jwt middle ware will verify the jwt token. It can be used at other api's but should be used where needed
+    app.get("/order", verifyJWT, async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
       const cursor = orderCollection.find(query);
       const orders = await cursor.toArray();
       res.send(orders);
